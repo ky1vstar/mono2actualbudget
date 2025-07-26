@@ -10,11 +10,10 @@ services:
       - ACTUAL_SERVER_PASSWORD=${ACTUAL_SERVER_PASSWORD}
       - ACTUAL_SYNC_ID=${ACTUAL_SYNC_ID}
       # - ACTUAL_DATA_DIR=/app/data  # You can override the data directory if needed
-      - SENSEBANK_DEVICE_TOKEN=${SENSEBANK_DEVICE_TOKEN}
-      - SENSEBANK_DEVICE_FINGERPRINT=${SENSEBANK_DEVICE_FINGERPRINT}
-      - SENSEBANK_DEVICE_TOUCH_ID=${SENSEBANK_DEVICE_TOUCH_ID}
+      - MONO_TOKEN=${MONO_TOKEN}
       - ACCOUNT_IDS=${ACCOUNT_IDS}
-      - DEPOSIT_ACCOUNT_IDS=${DEPOSIT_ACCOUNT_IDS}
+      # Lookback period in ISO8601 duration format (default: P6M = 6 months)
+      # - LOOKBACK_PERIOD=P6M
       - CRON=*/30 * * * *  # Run every 30 minutes
       # - CRON_SENTRY_DSN=https://public@sentry.example.com/1
     restart: unless-stopped
