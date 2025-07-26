@@ -43,7 +43,7 @@ async function main() {
     console.log(`Found ${clientInfo.accounts.length} accounts:`);
     
     clientInfo.accounts.forEach((account, index) => {
-      console.log(`\nAccount #${index + 1}: ${account.maskedPan[0]}`);
+      console.log(`\nAccount #${index + 1}: ${account.type} (${account.maskedPan[0] ?? account.iban})`);
       console.log(`  ID: ${account.id}`);
       console.log(`  Currency: ${currencyCodes.number(account.currencyCode).code}`);
     });
