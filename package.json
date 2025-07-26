@@ -1,0 +1,21 @@
+{
+  "name": "mono2actualbudget",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@actual-app/api": "^25.7.1",
+    "axios": "^1.10.0",
+    "currency-codes": "^2.2.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.0",
+    "iso8601-duration": "^2.1.2"
+  }
+}

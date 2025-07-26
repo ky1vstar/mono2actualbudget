@@ -1,0 +1,20 @@
+services:
+  app:
+    build: .
+    # volumes:
+      # You might need to create this directory with correct permissions first
+      # Run: mkdir -p ./data && chmod 777 ./data
+      # - ./data:/app/data
+    environment:
+      - ACTUAL_SERVER_URL=${ACTUAL_SERVER_URL}
+      - ACTUAL_SERVER_PASSWORD=${ACTUAL_SERVER_PASSWORD}
+      - ACTUAL_SYNC_ID=${ACTUAL_SYNC_ID}
+      # - ACTUAL_DATA_DIR=/app/data  # You can override the data directory if needed
+      - SENSEBANK_DEVICE_TOKEN=${SENSEBANK_DEVICE_TOKEN}
+      - SENSEBANK_DEVICE_FINGERPRINT=${SENSEBANK_DEVICE_FINGERPRINT}
+      - SENSEBANK_DEVICE_TOUCH_ID=${SENSEBANK_DEVICE_TOUCH_ID}
+      - ACCOUNT_IDS=${ACCOUNT_IDS}
+      - DEPOSIT_ACCOUNT_IDS=${DEPOSIT_ACCOUNT_IDS}
+      - CRON=*/30 * * * *  # Run every 30 minutes
+      # - CRON_SENTRY_DSN=https://public@sentry.example.com/1
+    restart: unless-stopped

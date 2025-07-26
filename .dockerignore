@@ -1,0 +1,32 @@
+# Version control files
+.git
+.gitignore
+
+# Node.js dependencies and build files
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Data directory (will be created in the container)
+data/
+
+# Docker related files
+Dockerfile
+.dockerignore
+# Don't exclude docker-entrypoint.sh as we need to copy it
+
+# Editor configs
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
