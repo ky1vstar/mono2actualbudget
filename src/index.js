@@ -1,14 +1,12 @@
 require('dotenv').config(); // Load environment variables from .env file
-const fs = require('fs');
-const actualApi = require('@actual-app/api');
+const actualHttpApi = require('@ky1vistar/actual-http-api-client');
 const monoApi = require('./api')();
 const { parse, toSeconds } = require('iso8601-duration');
 const currencyCodes = require('currency-codes');
 
 // Environment variables
-const ACTUAL_DATA_DIR = process.env.ACTUAL_DATA_DIR || './data';
-const ACTUAL_SERVER_URL = process.env.ACTUAL_SERVER_URL;
-const ACTUAL_SERVER_PASSWORD = process.env.ACTUAL_SERVER_PASSWORD;
+const ACTUAL_API_URL = process.env.ACTUAL_API_URL;
+const ACTUAL_API_KEY = process.env.ACTUAL_API_KEY;
 const ACTUAL_SYNC_ID = process.env.ACTUAL_SYNC_ID;
 const MONO_TOKEN = process.env.MONO_TOKEN;
 const ACCOUNT_IDS = !process.env.ACCOUNT_IDS ? new Map() : new Map(
@@ -19,21 +17,19 @@ const LOOKBACK_PERIOD = toSeconds(parse(process.env.LOOKBACK_PERIOD || 'P6M')); 
 // Constants
 const STARTING_BALANCES_CATEGORY_ID = '506e8d9d-7ed0-4397-84e4-07a9185dc6b2';
 
+// Initialize Actual API client
+const actualApiConfig = new actualHttpApi.Configuration({
+  basePath: ACTUAL_API_URL,
+  apiKey: ACTUAL_API_KEY,
+});
+const actualApiClient = {
+  accounts: actualHttpApi.AccountsApiFactory(actualApiConfig),
+  transactions: actualHttpApi.TransactionsApiFactory(actualApiConfig),
+  categories: actualHttpApi.CategoriesApiFactory(actualApiConfig),
+};
+
 async function main() {
   try {
-    // Ensure the data directory exists
-    if (!fs.existsSync(ACTUAL_DATA_DIR)) {
-      fs.mkdirSync(ACTUAL_DATA_DIR);
-    }
-    
-    await actualApi.init({
-      dataDir: ACTUAL_DATA_DIR,
-      serverURL: ACTUAL_SERVER_URL,
-      password: ACTUAL_SERVER_PASSWORD,
-    });
-
-    await actualApi.downloadBudget(ACTUAL_SYNC_ID);
-
     await monoApi.init(MONO_TOKEN);
     
     // Get client info from Monobank
@@ -72,10 +68,8 @@ async function main() {
     }
 
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error('Error:', error);
     process.exit(1);
-  } finally {
-    await actualApi.shutdown();
   }
 }
 
@@ -84,18 +78,14 @@ async function importTransactionsToActual(monoAccountId, actualAccountId) {
 
   try {
     // Get the last imported transaction
-    const lastTransactions = await actualApi.aqlQuery(
-      actualApi.q('transactions')
-        .filter({
-          $and: [
-            { account: actualAccountId },
-            { imported_id: { $like: 'mono|%' } },
-          ],
-        })
-        .orderBy({ date: 'desc' })
-        .limit(1)
-        .select('*')
-    );
+    const lastTransactions = await actualApiClient.transactions
+      .budgetsBudgetSyncIdAccountsAccountIdTransactionsGet(ACTUAL_SYNC_ID, actualAccountId, "1970-01-01")
+      .then(res => res.data)
+      .then(data => {
+        data.data = data.data.filter(tx => tx.imported_id && tx.imported_id.startsWith('mono|'));
+        data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        return data;
+      });
 
     let lastImportedId = null;
     let lastImportedDate = null;
@@ -177,7 +167,7 @@ async function importTransactionsToActual(monoAccountId, actualAccountId) {
 
     if (oldestTransaction && !foundLastImported) {
       console.log('No last imported transaction found, adding starting balance');
-      const categories = await actualApi.getCategories();
+      const categories = await actualApiClient.categories.budgetsBudgetSyncIdCategoriesGet(ACTUAL_SYNC_ID).then(res => res.data.data);
       const startingBalanceCatId = categories
         .find(cat => cat.name === 'Starting Balances')?.id || STARTING_BALANCES_CATEGORY_ID;
       allNewTransactions.push({
@@ -193,7 +183,12 @@ async function importTransactionsToActual(monoAccountId, actualAccountId) {
     // Import transactions to Actual
     if (allNewTransactions.length > 0) {
       console.log(`Importing ${allNewTransactions.length} transactions to Actual Budget`);
-      await actualApi.importTransactions(actualAccountId, allNewTransactions);
+      if (allNewTransactions.length === 0) return;
+      await actualApiClient.transactions.budgetsBudgetSyncIdAccountsAccountIdTransactionsImportPost(
+        ACTUAL_SYNC_ID,
+        actualAccountId,
+        { transactions: allNewTransactions },
+      );
     } else {
       console.log('No new transactions to import');
     }

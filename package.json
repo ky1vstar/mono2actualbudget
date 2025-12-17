@@ -11,7 +11,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@actual-app/api": "^25.8.0",
+    "@ky1vistar/actual-http-api-client": "github:ky1vstar/actual-http-api-client",
     "axios": "^1.11.0",
     "currency-codes": "^2.2.0",
     "dotenv": "^17.2.1",
