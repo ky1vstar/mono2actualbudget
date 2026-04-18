@@ -1,15 +1,7 @@
 #!/bin/sh
 set -e
 
-# Ensure data directory exists and has correct permissions
-DATA_DIR="${ACTUAL_DATA_DIR:-./data}"
-mkdir -p "$DATA_DIR"
-# Since we're running as node user, we need to make sure we have permissions
-if [ -w "$DATA_DIR" ]; then
-  echo "Data directory $DATA_DIR is writable"
-else
-  echo "Warning: Data directory $DATA_DIR is not writable by node user"
-fi
+export HEALTHCHECK_FILE="${HEALTHCHECK_FILE:-/run/healthcheck}"
 
 if [ -n "$CRON" ]; then
   echo "$CRON node /app/src/index.js" > /app/crontab

@@ -55,10 +55,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV ACTUAL_DATA_DIR=./data
 
 # Switch to non-root user
 USER node
 
 # Command to run the application
+HEALTHCHECK --interval=5m --timeout=5s --retries=1 CMD [ "sh", "-c", "! test -f ${HEALTHCHECK_FILE:-/run/healthcheck}" ]
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
