@@ -30,8 +30,9 @@ const actualApiClient = {
 
 async function main() {
   const fs = require('fs');
-  const healthcheckFile = process.env.HEALTHCHECK_FILE;
-  if (healthcheckFile) fs.rmSync(healthcheckFile, { force: true });
+  const path = require('path');
+  const healthcheckFile = path.join(process.cwd(), 'healthcheck');
+  fs.rmSync(healthcheckFile, { force: true });
 
   try {
     await monoApi.init(MONO_TOKEN);
@@ -73,7 +74,7 @@ async function main() {
 
   } catch (error) {
     console.error('Error:', error);
-    if (healthcheckFile) fs.writeFileSync(healthcheckFile, '');
+    fs.writeFileSync(healthcheckFile, '');
     process.exit(1);
   }
 }
