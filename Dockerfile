@@ -60,5 +60,5 @@ ENV NODE_ENV=production
 USER node
 
 # Command to run the application
-HEALTHCHECK --interval=5m --timeout=5s --retries=1 CMD [ "sh", "-c", "! test -f /app/healthcheck" ]
+HEALTHCHECK --interval=5m --timeout=5s --retries=1 CMD [ "sh", "-c", "! test -f /app/data/healthcheck" ]
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

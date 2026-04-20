@@ -31,7 +31,7 @@ const actualApiClient = {
 async function main() {
   const fs = require('fs');
   const path = require('path');
-  const healthcheckFile = path.join(process.cwd(), 'healthcheck');
+  const healthcheckFile = path.join(process.cwd(), 'data', 'healthcheck');
   fs.rmSync(healthcheckFile, { force: true });
 
   try {
