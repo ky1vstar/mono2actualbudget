@@ -109,8 +109,8 @@ async function importTransactionsToActual(monoAccountId, actualAccountId) {
 
     // If we have a last imported transaction, check if it's within the lookback period
     let fromDate = lookbackDate;
-    if (lastImportedDate && Date.parse(lastImportedDate) < lookbackDate) {
-      fromDate = Date.parse(lastImportedDate);
+    if (lastImportedDate && new Date(lastImportedDate) < lookbackDate) {
+      fromDate = new Date(lastImportedDate);
       console.log(`Using last imported transaction date: ${lastImportedDate}`);
     }
 
@@ -127,6 +127,7 @@ async function importTransactionsToActual(monoAccountId, actualAccountId) {
       
       // Don't go earlier than the fromDate
       const effectiveStartDate = startDate > fromDate ? startDate : fromDate;
+      console.log(`${effectiveStartDate} ${startDate} ${fromDate}`);
       
       const fromTimestamp = Math.floor(effectiveStartDate.getTime() / 1000);
       const toTimestamp = Math.floor(currentEndDate.getTime() / 1000);
