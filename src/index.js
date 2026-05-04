@@ -16,6 +16,7 @@ const LOOKBACK_PERIOD = toSeconds(parse(process.env.LOOKBACK_PERIOD || 'P6M')); 
 
 // Constants
 const STARTING_BALANCES_CATEGORY_ID = '506e8d9d-7ed0-4397-84e4-07a9185dc6b2';
+const IMPORT_BATCH_SIZE = 100;
 
 // Initialize Actual API client
 const actualApiConfig = new actualHttpApi.Configuration({
@@ -27,6 +28,18 @@ const actualApiClient = {
   transactions: actualHttpApi.TransactionsApiFactory(actualApiConfig),
   categories: actualHttpApi.CategoriesApiFactory(actualApiConfig),
 };
+
+async function importTransactionsInBatches(accountId, transactions) {
+  for (let i = 0; i < transactions.length; i += IMPORT_BATCH_SIZE) {
+    const batch = transactions.slice(i, i + IMPORT_BATCH_SIZE);
+    console.log(`  Importing batch ${Math.floor(i / IMPORT_BATCH_SIZE) + 1} (${batch.length} transactions)`);
+    await actualApiClient.transactions.budgetsBudgetSyncIdAccountsAccountIdTransactionsImportPost(
+      ACTUAL_SYNC_ID,
+      accountId,
+      { transactions: batch },
+    );
+  }
+}
 
 async function main() {
   const fs = require('fs');
@@ -190,12 +203,7 @@ async function importTransactionsToActual(monoAccountId, actualAccountId) {
     // Import transactions to Actual
     if (allNewTransactions.length > 0) {
       console.log(`Importing ${allNewTransactions.length} transactions to Actual Budget`);
-      if (allNewTransactions.length === 0) return;
-      await actualApiClient.transactions.budgetsBudgetSyncIdAccountsAccountIdTransactionsImportPost(
-        ACTUAL_SYNC_ID,
-        actualAccountId,
-        { transactions: allNewTransactions },
-      );
+      await importTransactionsInBatches(actualAccountId, allNewTransactions);
     } else {
       console.log('No new transactions to import');
     }
